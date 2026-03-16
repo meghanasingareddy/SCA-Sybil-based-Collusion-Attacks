@@ -1,0 +1,36 @@
+SCA Sybil based Collusion Attacks of IIoT Data Poisoning in Federated Learning
+
+
+IEEE Transactions on Industrial Informatics,Issue Date:03.May.2022
+
+
+IIoT, Federated learning, Label flipping attacks,Sybil, Collusion attacks.
+
+
+SCA_Sybil_based_Collusion_Attacks
+
+
+sca_sybil_based_collusion_attacks
+
+
+
+
+detect_sybil_based_collusion_attacks
+
+
+source_ip
+destination_ip
+start_time
+Network_Node_Text
+source_port
+destination_port
+flags
+site
+asn
+num_packets
+num_bytes
+Prediction
+
+
+
+
