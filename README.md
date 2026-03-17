@@ -1,184 +1,61 @@
-# SCA — Sybil-based Collusion Attacks Detection in IIoT Federated Learning
+# Sybil-Based Collusion Attacks in IIoT Federated Learning
 
-A Django-based web application that detects **Sybil-based Collusion Attacks (SCA)** targeting **Industrial Internet of Things (IIoT)** data poisoning in **Federated Learning** environments.
+## 1. Project Overview
+This project is a web application that functions as a Centralized Machine Learning Defense Gateway. It is specifically designed to detect and intercept malicious cyberattacks, specifically Sybil-based Collusion Attacks, within Federated Learning environments utilized by Industrial IoT (IIoT) devices. By analyzing network traffic behavior, it prevents malicious nodes from successfully poisoning a shared global AI model.
 
-> **Reference Paper:** *IEEE Transactions on Industrial Informatics* — Issue Date: 03 May 2022
+## 2. The Problem Statement
+Federated Learning (FL) allows distributed IoT devices to train AI models collaboratively locally without sharing raw, private data with a central server. While highly valuable for privacy, FL introduces a critical vulnerability: Label-Flipping Data Poisoning.
 
----
+If an attacker physically or remotely compromises a portion of the network, they can generate multiple fake identities (a Sybil attack). These spoofed devices can successfully team up (collude) to mathematically poison their local model updates. Because the central FL server operates on a "blind trust" protocol (it cannot see the raw data to verify), it blindly accepts these poisoned updates during the aggregation phase, fundamentally corrupting the accuracy of the global AI.
 
-## 📌 Overview
+This project serves as the Intrusion Detection System that prevents this vulnerability by auditing the network traffic patterns of connecting devices before they are allowed to participate in model aggregation.
 
-Federated Learning (FL) enables decentralized model training across IIoT devices without sharing raw data. However, FL is vulnerable to **Sybil-based collusion attacks**, where adversaries inject malicious nodes that collude to poison model updates through **label-flipping attacks**, degrading global model performance.
+## 3. Application Workflow
+Our defense platform operates as a secure gateway between the IIoT devices and the FL Central Server. It utilizes Traditional Machine Learning models as opposed to Deep Learning to perform highly efficient network traffic analysis.
 
-This project implements a web-based detection system that:
+The system is split into two primary interfaces:
 
-- Analyzes network traffic data from IIoT nodes to identify potential Sybil-based collusion attacks.
-- Trains and compares multiple machine learning classifiers to detect attack patterns.
-- Provides role-based functionality for **Remote Users** (data submission & prediction) and **Service Providers** (model training & monitoring).
+1. **The Remote User (The Client/IIoT Node):** End-users or automated IIoT devices log into the platform and submit their device's specific network traffic parameters (such as source IP, destination port, packet count, byte count, etc.). The Machine Learning backend immediately processes this data and predicts whether the traffic footprint is benign or resembles the signature of a Sybil-based collusion attacker.
+2. **The Service Provider (The Admin/Server):** A monitoring dashboard for network administrators. The provider can view all connected user nodes, initialize the training phase of the machine learning ensemble on historical network datasets, view ratios of normal versus malicious traffic, and quantitatively compare the accuracy convergence of the different ML algorithms.
 
----
+## 4. Technical Architecture
 
-## 🏗️ Architecture
+### Backend Framework
+* **Core:** Built utilizing Django (Python) for robust session handling, routing, and database interactions. It is configured for SQLite3 to enable seamless local deployment without complex external database requirements.
+* **Data Processing Layer:** Because machine learning algorithms require numerical inputs, the system implements Natural Language Processing logic via `CountVectorizer` (from the Scikit-Learn library). This component parses complex, unstructured network log text strings (`Network_Node_Text`) into an easily analyzable sparse mathematical matrix.
 
-```
-SCA_Sybil_based_Collusion_Attacks/
-├── Database/                          # MySQL database schema
-│   └── sca_sybil_based_collusion_attacks.sql
-├── sca_sybil_based_collusion_attacks/ # Django project root
-│   ├── manage.py
-│   ├── Network_Datasets.csv           # Training dataset
-│   ├── Results.csv                    # Prediction results
-│   ├── Remote_User/                   # Remote User app
-│   │   ├── models.py                  # Data models
-│   │   ├── views.py                   # User views & prediction logic
-│   │   └── forms.py                   # User forms
-│   ├── Service_Provider/              # Service Provider app
-│   │   └── views.py                   # Admin views & ML training
-│   ├── Template/                      # HTML templates & static files
-│   │   ├── htmls/
-│   │   │   ├── RUser/                 # Remote User templates
-│   │   │   └── SProvider/             # Service Provider templates
-│   │   └── images/                    # Static images
-│   └── sca_sybil_based_collusion_attacks/
-│       ├── settings.py                # Django settings
-│       ├── urls.py                    # URL routing
-│       └── wsgi.py                    # WSGI config
-└── Datastructure.txt                  # Data field descriptions
-```
+### Machine Learning Pipeline
+The detection system extracts features from a dataset of approximately 40,000 historical IIoT network traffic records (`Network_Datasets.csv`). The platform trains a comprehensive ensemble of 5 Machine Learning Classifiers:
 
----
+1. **Naive Bayes (MultinomialNB):** A highly efficient, probabilistic classifier that specializes in evaluating the text-based network features extracted by the vectorizer.
+2. **Support Vector Machine (SVM):** A complex mathematical classifier that plots network data in multi-dimensional space to define the widest optimal hyperplane separating benign traffic from malicious packets.
+3. **Logistic Regression:** A resilient binary classifier that utilizes a sigmoid curve function to predict the exact probability percentage of an attack.
+4. **Decision Tree Classifier:** A model optimized for identifying hidden non-linear relationships in network data branches (for example, isolating a specific port correlating with a specific high packet count).
+5. **SGD Classifier (Stochastic Gradient Descent):** An advanced optimization model that computes incredibly fast, singular gradient updates suitable for processing large-scale datasets.
 
-## ✨ Features
+### The Core Detection Mechanism
+The system leverages these predictive classifiers in a unified structure to make highly accurate, real-time determinations on live internal network traffic to successfully identify and flag obfuscated Sybil entities.
 
-### 🔐 Remote User Module
-- **User Registration & Login** — Secure account creation and authentication.
-- **Profile Management** — View and manage user profile details.
-- **Attack Prediction** — Submit network traffic parameters (source/destination IP, ports, flags, ASN, packet/byte counts) and receive real-time attack detection predictions using an ensemble classifier.
+## 5. Live Demonstration Instructions
+To execute a live demonstration of the ML defense mechanisms, follow this structured execution flow:
 
-### 🛡️ Service Provider Module
-- **Admin Dashboard** — View registered remote users and manage the system.
-- **ML Model Training** — Train and evaluate multiple classifiers on the network dataset:
-  - Naive Bayes
-  - Support Vector Machine (SVM)
-  - Logistic Regression
-  - Decision Tree Classifier
-  - SGD Classifier
-- **Attack Status Monitoring** — View all detected Sybil-based collusion attack statuses.
-- **Detection Ratio Analysis** — Visualize the ratio of attacked vs. non-attacked network traffic.
-- **Accuracy Comparison Charts** — Interactive charts comparing classifier accuracies.
-- **Dataset Export** — Download predicted datasets as Excel files.
+1. **Deploy the Local Environment:** Execute the command `python manage.py runserver` from the command line interface and wait for the Django development server to initialize at `http://127.0.0.1:8000/`.
+2. **Train the Defense Algorithms (Admin View):** Access the Service Provider login page (`/serviceproviderlogin/`) utilizing the administrative credentials. Navigate to the "Train Model" panel. This action instructs the Python backend to parse the empirical CSV dataset, trigger the vectorizer process, and train the five discrete Machine Learning models.
+3. **Analyze System Accuracy:** Once training concludes, display the generated Accuracy Bar Charts and Line Charts to visually demonstrate model convergence and relative performance metrics.
+4. **Execute an Active Prediction (User View):** Terminate the admin session and return to the main portal. Register a mock IIoT Remote User account and authenticate. Select an established "Attack" data row (Label = 1) from the `Network_Datasets.csv` repository. Input these discrete network parameters into the manual Prediction Form and submit the request to demonstrate the platform actively intercepting the Sybil threat in real-time.
 
----
+## 6. System Screenshots
 
-## 🧠 Machine Learning Pipeline
+Below are captures of the live system demonstrating the user interface and machine learning accuracy charting:
 
-| Step | Description |
-|------|-------------|
-| **Data Ingestion** | Load `Network_Datasets.csv` with labeled network traffic data |
-| **Feature Extraction** | Convert `Network_Node_Text` into numerical features using `CountVectorizer` |
-| **Label Encoding** | Map labels — `0` → No Attack Found, `1` → Attack Found |
-| **Train/Test Split** | 80/20 split for training and evaluation |
-| **Model Training** | Train Naive Bayes, SVM, Logistic Regression, Decision Tree, and SGD classifiers |
-| **Ensemble Prediction** | Use `VotingClassifier` (SVM + SGD) for final attack prediction |
-| **Evaluation** | Accuracy score, confusion matrix, and classification report for each model |
+**Main Gateway Interface:**
+![Main Gateway](screenshots/media__1773727250590.png)
 
----
+**Authentication Portal:**
+![Login View](screenshots/media__1773727266634.png)
 
-## 🔧 Tech Stack
+**Machine Learning Training Results (Bar Chart):**
+![Accuracy Bar Chart](screenshots/media__1773726874427.png)
 
-| Component | Technology |
-|-----------|------------|
-| **Backend** | Django 3.x (Python) |
-| **Database** | MySQL |
-| **ML Libraries** | scikit-learn, pandas |
-| **Frontend** | HTML, CSS, JavaScript |
-| **Data Export** | xlwt (Excel) |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.7+
-- MySQL Server
-- pip
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/meghanasingareddy/SCA-Sybil-based-Collusion-Attacks.git
-   cd SCA-Sybil-based-Collusion-Attacks/SCA_Sybil_based_Collusion_Attacks
-   ```
-
-2. **Create and activate a virtual environment**
-   ```bash
-   python -m venv venv
-   # Windows
-   venv\Scripts\activate
-   # macOS/Linux
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install django mysqlclient scikit-learn pandas xlwt
-   ```
-
-4. **Set up the MySQL database**
-   - Create a database named `sca_sybil_based_collusion_attacks`.
-   - Import the schema:
-     ```bash
-     mysql -u root -p sca_sybil_based_collusion_attacks < Database/sca_sybil_based_collusion_attacks.sql
-     ```
-   - Update `settings.py` with your MySQL credentials if needed.
-
-5. **Run migrations**
-   ```bash
-   cd sca_sybil_based_collusion_attacks
-   python manage.py migrate
-   ```
-
-6. **Start the development server**
-   ```bash
-   python manage.py runserver
-   ```
-
-7. **Access the application**
-   - Home Page: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-   - Service Provider Login: [http://127.0.0.1:8000/serviceproviderlogin/](http://127.0.0.1:8000/serviceproviderlogin/)
-     - Username: `Admin` | Password: `Admin`
-
----
-
-## 📊 Dataset
-
-The project uses `Network_Datasets.csv` containing network traffic features:
-
-| Field | Description |
-|-------|-------------|
-| `source_ip` | Source IP address |
-| `destination_ip` | Destination IP address |
-| `start_time` | Timestamp of network activity |
-| `Network_Node_Text` | Textual representation of network node activity |
-| `source_port` | Source port number |
-| `destination_port` | Destination port number |
-| `flags` | Network flags |
-| `site` | Network site identifier |
-| `asn` | Autonomous System Number |
-| `num_packets` | Number of packets transmitted |
-| `num_bytes` | Number of bytes transmitted |
-| `Label` | Attack label — `0` (No Attack) / `1` (Attack) |
-
----
-
-## 🔑 Keywords
-
-`IIoT` · `Federated Learning` · `Label Flipping Attacks` · `Sybil Attacks` · `Collusion Attacks` · `Network Security` · `Machine Learning` · `Django`
-
----
-
-## 📄 License
-
-This project is for academic and research purposes.
+**Machine Learning Training Results (Line Chart):**
+![Accuracy Line Chart](screenshots/media__1773726881161.png)
