@@ -35,9 +35,9 @@ def View_All_Sybil_based_Collusion_Attack_Status_Ratio(request):
     print(kword)
     obj = detect_sybil_based_collusion_attacks.objects.all().filter(Q(Prediction=kword))
     obj1 = detect_sybil_based_collusion_attacks.objects.all()
-    count = obj.count();
-    count1 = obj1.count();
-    ratio = (count / count1) * 100
+    count = obj.count()
+    count1 = obj1.count()
+    ratio = (count / count1) * 100 if count1 > 0 else 0
     if ratio != 0:
         detection_ratio.objects.create(names=kword, ratio=ratio)
 
@@ -46,9 +46,9 @@ def View_All_Sybil_based_Collusion_Attack_Status_Ratio(request):
     print(kword12)
     obj12 = detect_sybil_based_collusion_attacks.objects.all().filter(Q(Prediction=kword12))
     obj112 = detect_sybil_based_collusion_attacks.objects.all()
-    count12 = obj12.count();
-    count112 = obj112.count();
-    ratio12 = (count12 / count112) * 100
+    count12 = obj12.count()
+    count112 = obj112.count()
+    ratio12 = (count12 / count112) * 100 if count112 > 0 else 0
     if ratio12 != 0:
         detection_ratio.objects.create(names=kword12, ratio=ratio12)
 

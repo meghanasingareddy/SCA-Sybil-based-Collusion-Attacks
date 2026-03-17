@@ -53,9 +53,3 @@ Below are captures of the live system demonstrating the user interface and machi
 
 **Authentication Portal:**
 ![Login View](screenshots/media__1773727266634.png)
-
-**Machine Learning Training Results (Bar Chart):**
-![Accuracy Bar Chart](screenshots/media__1773726874427.png)
-
-**Machine Learning Training Results (Line Chart):**
-![Accuracy Line Chart](screenshots/media__1773726881161.png)
